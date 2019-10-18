@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "Archiver": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
