@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +11,8 @@ namespace Archiver
 {
     public class Worker : BackgroundService
     {
+        private string _archivedPath;
+        private DateTime _archiveLimit;
         private readonly IConfiguration _config;
         private readonly ILogger<Worker> _logger;
 
@@ -21,6 +26,10 @@ namespace Archiver
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Archiving worker service has started");
+
+            _archiveLimit = DateTime.UtcNow.AddDays(-3);
+            _archivedPath = @"C:\0_Playground\0_Locker\DailyManager";
+
             return base.StartAsync(cancellationToken);
         }
 
@@ -29,9 +38,23 @@ namespace Archiver
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("On execution the archiving worker service will wait for 5 mins before archiving");
+
                 await Task.Delay(5 * 60 * 1000, stoppingToken);
 
-                //Code logic will go here
+                //Get directory info
+                DirectoryInfo directoryInfo = new DirectoryInfo(_archivedPath);
+
+                //Get directory to archive based on archive limit datatime
+                var directories = directoryInfo.EnumerateDirectories().Where(x => !x.Name.StartsWith('_') && x.CreationTimeUtc < _archiveLimit);
+
+                foreach(var directory in directories)
+                {
+                    directory.MoveTo(_archivedPath + @"\_Archived\" + directory.Name);
+                }
+
+                _logger.LogInformation("Archiving process completed");
+
+                await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
         }
 
