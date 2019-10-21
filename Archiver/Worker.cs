@@ -39,13 +39,14 @@ namespace Archiver
             {
                 _logger.LogInformation("On execution the archiving worker service will wait for 5 mins before archiving");
 
-                await Task.Delay(5 * 60 * 1000, stoppingToken);
+                // Moving the minute delay from 5 to 1 minute
+                await Task.Delay(1 * 60 * 1000, stoppingToken);
 
                 //Get directory info
                 DirectoryInfo directoryInfo = new DirectoryInfo(_archivedPath);
 
                 //Get directory to archive based on archive limit datatime
-                var directories = directoryInfo.EnumerateDirectories().Where(x => !x.Name.StartsWith('_') && x.CreationTimeUtc < _archiveLimit);
+                var directories = directoryInfo.EnumerateDirectories().Where(x => !x.Name.StartsWith('_') && x.CreationTime < _archiveLimit);
 
                 foreach(var directory in directories)
                 {
@@ -53,6 +54,19 @@ namespace Archiver
                 }
 
                 _logger.LogInformation("Archiving process completed");
+
+                // Create folder structure for current day, skip if sat & sun
+                DateTime today = DateTime.Now;
+                string date = today.ToString("yyyyMMdd");
+                DirectoryInfo taskDirectoryInfo = new DirectoryInfo($"{_archivedPath}\\{date}");
+
+                if ((today.DayOfWeek != DayOfWeek.Saturday
+                    && today.DayOfWeek != DayOfWeek.Sunday)
+                    || !taskDirectoryInfo.Exists)
+                {
+                    taskDirectoryInfo.Create();
+                    File.Create($"{taskDirectoryInfo.FullName}\\{today.ToString("yyyyMMddHHmm")}.md");
+                }
 
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
