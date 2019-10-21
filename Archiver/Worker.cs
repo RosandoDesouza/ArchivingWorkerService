@@ -65,7 +65,7 @@ namespace Archiver
                     || !taskDirectoryInfo.Exists)
                 {
                     taskDirectoryInfo.Create();
-                    File.Create($"{taskDirectoryInfo.FullName}\\{today.ToString("yyyyMMddHHmm")}.md");
+                    File.Create($"{taskDirectoryInfo.FullName}\\{today.ToString("yyyyMMddHHmm")}.md").Dispose();
                 }
 
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
