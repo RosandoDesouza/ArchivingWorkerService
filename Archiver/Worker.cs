@@ -33,6 +33,9 @@ namespace Archiver
             return base.StartAsync(cancellationToken);
         }
 
+        // TODO: Need to move this logic to StartAsync.
+        //       Also no point using the BackgroundServices base class.
+        //       Switch to IHostedService interface instead.
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
