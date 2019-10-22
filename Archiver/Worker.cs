@@ -63,9 +63,9 @@ namespace Archiver
                 string date = today.ToString("yyyyMMdd");
                 DirectoryInfo taskDirectoryInfo = new DirectoryInfo($"{_archivedPath}\\{date}");
 
-                if ((today.DayOfWeek != DayOfWeek.Saturday
-                    && today.DayOfWeek != DayOfWeek.Sunday)
-                    || !taskDirectoryInfo.Exists)
+                if (today.DayOfWeek != DayOfWeek.Saturday
+                    && today.DayOfWeek != DayOfWeek.Sunday
+                    && !taskDirectoryInfo.Exists)
                 {
                     taskDirectoryInfo.Create();
                     File.Create($"{taskDirectoryInfo.FullName}\\{today.ToString("yyyyMMddHHmm")}.md").Dispose();
